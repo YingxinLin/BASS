@@ -299,7 +299,7 @@ listAllHyper <- function(BASS)
 }
 
 
-runLSI <- function(count_matrix) {
+runLSI <- function(count_matrix, ncomponents) {
 
     tf <- t(t(count_matrix)/Matrix::colSums(count_matrix))
     idf <- log(1 + ncol(count_matrix)/Matrix::rowSums(count_matrix))
@@ -345,6 +345,8 @@ setMethod(
 #'   or highly variable genes with the scran package (\code{hvgs}).
 #' @param doPCA Logical. Whether to perform PCA on the normalized expression 
 #'   matrix to extract \code{nPC} low-dimensional expression features.
+#' @param doLSI Logical. Whether to perform LSI on the normalized expression 
+#'   matrix to extract \code{nPC} low-dimensional expression features.
 #' @param scaleFeature Logical. Whether to center and standardize each gene 
 #'  to have a mean of 0 and standard deviation of 1 before performing PCA.
 #' @param doBatchCorrect Logical. Whether to perform batch effect adjustment 
@@ -366,6 +368,7 @@ BASS.preprocess <- function(
         doLogNormalize = TRUE,
         geneSelect = c("sparkx", "hvgs"),
         doPCA = TRUE,
+        doLSI = FALSE,
         scaleFeature = TRUE,
         doBatchCorrect = TRUE,
         nHVG = 2000,
@@ -410,7 +413,7 @@ BASS.preprocess <- function(
         X_run <- (X_run %*% Q)[, 1:nPC]
     } else if (doLSI) {
         cat("***** Reduce data dimension with LSI *****\n")
-        X_run <- runLSI(X_run)
+        X_run <- runLSI(X_run, ncomponents = nPC)
     } else{
         X_run <- t(X_run)
     }
