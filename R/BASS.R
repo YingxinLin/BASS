@@ -95,31 +95,31 @@
 #' @slot elapsed_time: Elapsed time for running MCMC in seconds.
 #'
 setClass("BASS", slots = list(
-  X = "list",
-  X_run = "array",
-  xy = "list",
-  L = "numeric",
-  P = "numeric",
-  Ns = "numeric",
-  C = "numeric",
-  R = "numeric",
-  init_method = "character",
-  psi0 = "numeric",
-  n0 = "numeric",
-  alpha0 = "numeric",
-  k = "numeric",
-  burnin = "numeric",
-  nsample = "numeric",
-  beta_method = "character",
-  beta = "numeric",
-  step_size = "numeric",
-  tol = "numeric",
-  potts_nsample = "numeric",
-  potts_burnin = "numeric",
-  samples = "list",
-  results = "list",
-  elapsed_time = "numeric"
-  ))
+    X = "list",
+    X_run = "array",
+    xy = "list",
+    L = "numeric",
+    P = "numeric",
+    Ns = "numeric",
+    C = "numeric",
+    R = "numeric",
+    init_method = "character",
+    psi0 = "numeric",
+    n0 = "numeric",
+    alpha0 = "numeric",
+    k = "numeric",
+    burnin = "numeric",
+    nsample = "numeric",
+    beta_method = "character",
+    beta = "numeric",
+    step_size = "numeric",
+    tol = "numeric",
+    potts_nsample = "numeric",
+    potts_burnin = "numeric",
+    samples = "list",
+    results = "list",
+    elapsed_time = "numeric"
+))
 
 
 #' Create a BASS object
@@ -167,69 +167,69 @@ setClass("BASS", slots = list(
 #' @export
 #'
 createBASSObject <- function(
-  X, xy, C, R, 
-  init_method = c("kmeans", "mclust"), 
-  psi0 = 1,
-  n0 = 1,
-  alpha0 = 1, 
-  k = 4, 
-  burnin = 2000, 
-  nsample = 5000,
-  beta_method = c("SW", "fix"),
-  beta = 1,
-  step_size = 0.1,
-  tol = 1e-3,
-  potts_burnin = 10,
-  potts_nsample = 10
-  )
+        X, xy, C, R, 
+        init_method = c("kmeans", "mclust"), 
+        psi0 = 1,
+        n0 = 1,
+        alpha0 = 1, 
+        k = 4, 
+        burnin = 2000, 
+        nsample = 5000,
+        beta_method = c("SW", "fix"),
+        beta = 1,
+        step_size = 0.1,
+        tol = 1e-3,
+        potts_burnin = 10,
+        potts_nsample = 10
+)
 {
-  L <- length(X)
-  for(l in 1:L)
-  {
-    if(!is.matrix(xy[[l]])){
-      xy[[l]] <- as.matrix(xy[[l]])
-      cat("Location data coerced to a matrix\n")
+    L <- length(X)
+    for(l in 1:L)
+    {
+        if(!is.matrix(xy[[l]])){
+            xy[[l]] <- as.matrix(xy[[l]])
+            cat("Location data coerced to a matrix\n")
+        }
     }
-  }
-  
-  P <- nrow(X[[1]])
-  gene_names <- rownames(X[[1]])
-
-  # input checking
-  if(length(X) != length(xy))
-    stop("Number of samples (L) in expression list and location list", 
-      " do not match")
-  for(l in 1:L)
-  {
-    if(ncol(X[[l]]) != nrow(xy[[l]])){
-      stop("Number of cells in expression matrix and location matrix",
-        " do not match")
+    
+    P <- nrow(X[[1]])
+    gene_names <- rownames(X[[1]])
+    
+    # input checking
+    if(length(X) != length(xy))
+        stop("Number of samples (L) in expression list and location list", 
+             " do not match")
+    for(l in 1:L)
+    {
+        if(ncol(X[[l]]) != nrow(xy[[l]])){
+            stop("Number of cells in expression matrix and location matrix",
+                 " do not match")
+        }
+        if(!identical(colnames(X[[l]]), rownames(xy[[l]]))){
+            stop("Order of cells in expression matrix and location matrix",
+                 " do not match")
+        }
+        if(nrow(X[[l]]) != P){
+            stop("Number of genes is not consistent across samples.",
+                 " Please use a common set of genes.")
+        }
+        if(!identical(gene_names, rownames(X[[l]]))){
+            stop("Order of genes in expression matrices do not match")
+        }
     }
-    if(!identical(colnames(X[[l]]), rownames(xy[[l]]))){
-      stop("Order of cells in expression matrix and location matrix",
-        " do not match")
-    }
-    if(nrow(X[[l]]) != P){
-      stop("Number of genes is not consistent across samples.",
-        " Please use a common set of genes.")
-    }
-    if(!identical(gene_names, rownames(X[[l]]))){
-      stop("Order of genes in expression matrices do not match")
-    }
-  }
-
-  # create object
-  BASS <- new(Class = "BASS", 
-    X = X, xy = xy, L = L, P = P, Ns = sapply(X, ncol), C = C, R = R,
-    init_method = match.arg(init_method), alpha0 = alpha0, psi0 = psi0, 
-    n0 = n0, k = k, burnin = burnin, nsample = nsample, beta = beta, 
-    beta_method = match.arg(beta_method), step_size = step_size, tol = tol,
-    potts_burnin = potts_burnin, potts_nsample = potts_nsample)
-  rm(X)
-  rm(xy)
-  showWelcomeMessage(BASS)
-
-  return(BASS)
+    
+    # create object
+    BASS <- new(Class = "BASS", 
+                X = X, xy = xy, L = L, P = P, Ns = sapply(X, ncol), C = C, R = R,
+                init_method = match.arg(init_method), alpha0 = alpha0, psi0 = psi0, 
+                n0 = n0, k = k, burnin = burnin, nsample = nsample, beta = beta, 
+                beta_method = match.arg(beta_method), step_size = step_size, tol = tol,
+                potts_burnin = potts_burnin, potts_nsample = potts_nsample)
+    rm(X)
+    rm(xy)
+    showWelcomeMessage(BASS)
+    
+    return(BASS)
 }
 
 
@@ -237,20 +237,20 @@ createBASSObject <- function(
 #' @noRd
 showWelcomeMessage <- function(BASS)
 {
-  cat("***************************************\n")
-  cat("  INPUT INFO:\n")
-  cat("    - Number of tissue sections:", BASS@L, "\n")
-  cat("    - Number of cells/spots:", BASS@Ns, "\n")
-  cat("    - Number of genes:", BASS@P, "\n")
-  cat("    - Potts interaction parameter estimation method:", 
-    BASS@beta_method, "\n")
-  if(BASS@beta_method == "fix"){
-    cat("      - Fix Potts interaction parameter to be:", BASS@beta, "\n")
-  } else if(BASS@beta_method == "SW"){
-    cat("      - Estimate Potts interaction parameter with SW algorithm\n")
-  }
-  cat("  To list all hyper-parameters, Type listAllHyper(BASS_object)\n")
-  cat("***************************************\n")
+    cat("***************************************\n")
+    cat("  INPUT INFO:\n")
+    cat("    - Number of tissue sections:", BASS@L, "\n")
+    cat("    - Number of cells/spots:", BASS@Ns, "\n")
+    cat("    - Number of genes:", BASS@P, "\n")
+    cat("    - Potts interaction parameter estimation method:", 
+        BASS@beta_method, "\n")
+    if(BASS@beta_method == "fix"){
+        cat("      - Fix Potts interaction parameter to be:", BASS@beta, "\n")
+    } else if(BASS@beta_method == "SW"){
+        cat("      - Estimate Potts interaction parameter with SW algorithm\n")
+    }
+    cat("  To list all hyper-parameters, Type listAllHyper(BASS_object)\n")
+    cat("***************************************\n")
 }
 
 
@@ -264,52 +264,66 @@ showWelcomeMessage <- function(BASS)
 #' @export
 listAllHyper <- function(BASS)
 {
-  cat("***************************************\n")
-  cat("  Please refer to the paper for details of the paramters\n")
-  cat("  ALL HYPER-PARAMETERS:\n")
-  cat("    - Number of cell types C: ", BASS@C, "\n", sep = "")
-  cat("    - Number of spatial domains R: ", BASS@R, "\n", sep = "")
-  cat("    - Initialization method: ", BASS@init_method, "\n", sep = "")
-  cat("    - Scale matrix of the inverse-Wishart prior Psi0: ", 
-    BASS@psi0, "I", "\n", sep = "")
-  cat("    - Degrees of freedom of the inverse-Wishart prior n0: ", 
-    BASS@n0, "\n", sep = "")
-  cat("    - Number of MCMC burn-in iterations: ", BASS@burnin, "\n", sep = "")
-  cat("    - Number of MCMC posterior samples: ", BASS@nsample, "\n", sep = "")
-  cat("    - Potts interaction parameter estimation approach: ", 
-    BASS@beta_method, "\n", sep = "")
-  if(BASS@beta_method == "fix"){
-    cat("      - Fix Potts interaction parameter to be: ", 
-      BASS@beta, "\n", sep = "")
-  } else if(BASS@beta_method == "SW"){
-    cat("    - Number of burn-in interations in Potts sampling: ", 
-      BASS@potts_burnin, "\n", sep = "")
-    cat("    - Number of Potts samples to approximate the partition ratio: ", 
-      BASS@potts_nsample, "\n", sep = "")
-    cat("    - Step size of a uniform random walk: ", 
-      BASS@step_size, "\n", sep = "")
-    cat("    - Threshold of convergence for beta: ", 
-      BASS@tol, "\n", sep = "")
-  }
-  cat("    - Concentration parameter of the Dirichlet prior alpha0: ", 
-    BASS@alpha0, "\n", sep = "")
-  cat("    - Minimum number of neighbors for each cell/spot based on the ",
-    "Euclidean distance: ", BASS@k, "\n", sep = "")
-  cat("***************************************\n")
+    cat("***************************************\n")
+    cat("  Please refer to the paper for details of the paramters\n")
+    cat("  ALL HYPER-PARAMETERS:\n")
+    cat("    - Number of cell types C: ", BASS@C, "\n", sep = "")
+    cat("    - Number of spatial domains R: ", BASS@R, "\n", sep = "")
+    cat("    - Initialization method: ", BASS@init_method, "\n", sep = "")
+    cat("    - Scale matrix of the inverse-Wishart prior Psi0: ", 
+        BASS@psi0, "I", "\n", sep = "")
+    cat("    - Degrees of freedom of the inverse-Wishart prior n0: ", 
+        BASS@n0, "\n", sep = "")
+    cat("    - Number of MCMC burn-in iterations: ", BASS@burnin, "\n", sep = "")
+    cat("    - Number of MCMC posterior samples: ", BASS@nsample, "\n", sep = "")
+    cat("    - Potts interaction parameter estimation approach: ", 
+        BASS@beta_method, "\n", sep = "")
+    if(BASS@beta_method == "fix"){
+        cat("      - Fix Potts interaction parameter to be: ", 
+            BASS@beta, "\n", sep = "")
+    } else if(BASS@beta_method == "SW"){
+        cat("    - Number of burn-in interations in Potts sampling: ", 
+            BASS@potts_burnin, "\n", sep = "")
+        cat("    - Number of Potts samples to approximate the partition ratio: ", 
+            BASS@potts_nsample, "\n", sep = "")
+        cat("    - Step size of a uniform random walk: ", 
+            BASS@step_size, "\n", sep = "")
+        cat("    - Threshold of convergence for beta: ", 
+            BASS@tol, "\n", sep = "")
+    }
+    cat("    - Concentration parameter of the Dirichlet prior alpha0: ", 
+        BASS@alpha0, "\n", sep = "")
+    cat("    - Minimum number of neighbors for each cell/spot based on the ",
+        "Euclidean distance: ", BASS@k, "\n", sep = "")
+    cat("***************************************\n")
 }
 
+
+runLSI <- function(count_matrix) {
+
+    tf <- t(t(count_matrix)/Matrix::colSums(count_matrix))
+    idf <- log(1 + ncol(count_matrix)/Matrix::rowSums(count_matrix))
+    tfidf <- tf * idf
+    SVDtsne <- irlba::irlba(tfidf, ncomponents, ncomponents)
+    d_diagtsne <- matrix(0, nrow = ncomponents, ncol = ncomponents)
+    diag(d_diagtsne) <- SVDtsne$d
+    SVDtsne_vd <- t(d_diagtsne %*% t(SVDtsne$v))
+
+
+    return(SVDtsne_vd)
+}
 
 #' Overload print for BASS object
 #' @noRd
 setMethod(
-  f = "show",
-  signature = "BASS",
-  definition = 
-    function(object)
-    {
-      showWelcomeMessage(object)
-    }
-  )
+    f = "show",
+    signature = "BASS",
+    definition = 
+        function(object)
+        {
+            showWelcomeMessage(object)
+        }
+)
 
 
 #' Pre-process gene expression data
@@ -348,66 +362,69 @@ setMethod(
 #'   in the object.
 #' @export
 BASS.preprocess <- function(
-  BASS,
-  doLogNormalize = TRUE,
-  geneSelect = c("sparkx", "hvgs"),
-  doPCA = TRUE,
-  scaleFeature = TRUE,
-  doBatchCorrect = TRUE,
-  nHVG = 2000,
-  nSE = 3000,
-  nPC = 20
-  )
+        BASS,
+        doLogNormalize = TRUE,
+        geneSelect = c("sparkx", "hvgs"),
+        doPCA = TRUE,
+        scaleFeature = TRUE,
+        doBatchCorrect = TRUE,
+        nHVG = 2000,
+        nSE = 3000,
+        nPC = 20
+)
 {
-  geneSelect <- match.arg(geneSelect)
-  X_run <- do.call(cbind, BASS@X)
-  # 1.Library size normalization + log transformation
-  if(doLogNormalize){
-    cat("***** Log-normalize gene expression data *****\n")
-    X_run <- scater::normalizeCounts(X_run, log = TRUE)
-  }
-
-  # 2.Gene selection
-  if(geneSelect == "sparkx" & BASS@P > nSE){
-    cat("***** Select spatially expressed genes with sparkx *****\n")
-    genes <- lapply(1:BASS@L, function(l){
-      capture.output(sparkx.l <- SPARK::sparkx(BASS@X[[l]], BASS@xy[[l]]))
-      sparkx.l <- sparkx.l$res_mtest[order(sparkx.l$res_mtest$adjustedPval), ]
-      genes.l <- head(rownames(sparkx.l), n = nSE)
-    })
-    genes <- unique(unlist(genes))
-    X_run <- X_run[genes, ]
-  } else if(geneSelect == "hvgs" & BASS@P > nHVG){
-    cat("***** Select highly variable genes *****\n")
-    dec <- scran::modelGeneVar(X_run)
-    genes <- scran::getTopHVGs(dec, n = nHVG)
-    X_run <- X_run[genes, ]
-  }
-  cat("***** Exclude genes with 0 expression *****\n")
-  idx_rm <- apply(X_run, 1, sum) == 0
-  X_run <- X_run[!idx_rm, ]
-
-  # 3.Dimension reduction
-  if(doPCA){
-    cat("***** Reduce data dimension with PCA *****\n")
-    X_run <- apply(X_run, MARGIN = 1, scale, 
-      center = T, scale = scaleFeature)
-    Q <- prcomp(X_run, scale. = F)$rotation
-    X_run <- (X_run %*% Q)[, 1:nPC]
-  } else{
-    X_run <- t(X_run)
-  }
-
-  # 4.Batch effect correction
-  if(doBatchCorrect & BASS@L > 1){
-    cat("***** Correct batch effect with Harmony *****\n")
-    X_run <- harmony::HarmonyMatrix(
-      data_mat = X_run,
-      meta_data = as.character(rep(1:BASS@L, BASS@Ns)), 
-      do_pca = F, verbose = F)
-  }
-  BASS@X_run <- t(X_run)
-  return(BASS)
+    geneSelect <- match.arg(geneSelect)
+    X_run <- do.call(cbind, BASS@X)
+    # 1.Library size normalization + log transformation
+    if(doLogNormalize){
+        cat("***** Log-normalize gene expression data *****\n")
+        X_run <- scater::normalizeCounts(X_run, log = TRUE)
+    }
+    
+    # 2.Gene selection
+    if(geneSelect == "sparkx" & BASS@P > nSE){
+        cat("***** Select spatially expressed genes with sparkx *****\n")
+        genes <- lapply(1:BASS@L, function(l){
+            capture.output(sparkx.l <- SPARK::sparkx(BASS@X[[l]], BASS@xy[[l]]))
+            sparkx.l <- sparkx.l$res_mtest[order(sparkx.l$res_mtest$adjustedPval), ]
+            genes.l <- head(rownames(sparkx.l), n = nSE)
+        })
+        genes <- unique(unlist(genes))
+        X_run <- X_run[genes, ]
+    } else if(geneSelect == "hvgs" & BASS@P > nHVG){
+        cat("***** Select highly variable genes *****\n")
+        dec <- scran::modelGeneVar(X_run)
+        genes <- scran::getTopHVGs(dec, n = nHVG)
+        X_run <- X_run[genes, ]
+    }
+    cat("***** Exclude genes with 0 expression *****\n")
+    idx_rm <- apply(X_run, 1, sum) == 0
+    X_run <- X_run[!idx_rm, ]
+    
+    # 3.Dimension reduction
+    if(doPCA){
+        cat("***** Reduce data dimension with PCA *****\n")
+        X_run <- apply(X_run, MARGIN = 1, scale, 
+                       center = T, scale = scaleFeature)
+        Q <- prcomp(X_run, scale. = F)$rotation
+        X_run <- (X_run %*% Q)[, 1:nPC]
+    } else if (doLSI) {
+        cat("***** Reduce data dimension with LSI *****\n")
+        X_run <- runLSI(X_run)
+    } else{
+        X_run <- t(X_run)
+    }
+    
+    # 4.Batch effect correction
+    if(doBatchCorrect & BASS@L > 1){
+        cat("***** Correct batch effect with Harmony *****\n")
+        X_run <- harmony::HarmonyMatrix(
+            data_mat = X_run,
+            meta_data = as.character(rep(1:BASS@L, BASS@Ns)), 
+            do_pca = F, verbose = F)
+    }
+    BASS@X_run <- t(X_run)
+    return(BASS)
 }
 
 
@@ -427,42 +444,42 @@ BASS.preprocess <- function(
 #' @export
 BASS.run <- function(BASS)
 {
-  xy <- do.call(rbind, BASS@xy)
-  # initialize cell type labels, spatial domain labels, and
-  # mean parameters of gene expression features
-  if(BASS@init_method == "kmeans"){
-    km_c <- stats::kmeans(x = t(BASS@X_run), centers = BASS@C, 
-      iter.max = 100, nstart = 1000)
-    km_z <- stats::kmeans(x = t(BASS@X_run), centers = BASS@R,
-      iter.max = 100, nstart = 1000)
-    init_c <- km_c$cluster - 1
-    init_z <- km_z$cluster - 1
-    init_mu <- t(km_c$centers)
-  } else if(BASS@init_method == "mclust"){
-    mclust_c <- mclust::Mclust(data = t(BASS@X_run), G = BASS@C,
-      modelNames = "EEE", verbose = FALSE)
-    mclust_z <- mclust::Mclust(data = t(BASS@X_run), G = BASS@R,
-      modelNames = "EEE", verbose = FALSE)
-    init_c <- mclust_c$classification - 1
-    init_z <- mclust_z$classification - 1
-    init_mu <- mclust_c$parameters$mean
-  }
-  
-  output <- BASSFit(X = BASS@X_run, xy = xy, ns = BASS@Ns, 
-    C = BASS@C, R = BASS@R, k = BASS@k, alpha0 = BASS@alpha0, 
-    Psi0 = BASS@psi0 * diag(nrow(BASS@X_run)), n0 = BASS@n0,
-    burnin = BASS@burnin, nsample = BASS@nsample, method = BASS@beta_method,
-    potts_burnin = BASS@potts_burnin, potts_nsample = BASS@potts_nsample,
-    step_size = BASS@step_size, tol = BASS@tol, init_c = init_c, 
-    init_z = init_z, init_mu = init_mu, init_beta = BASS@beta)
-  
-  BASS@samples <- output[c("c", "z", "beta", "pi", "mu", "Sigma", "d", 
-    "lambda", "loglik")]
-  BASS@results[c("init_c", "init_z", "beta")] <- list(init_c, init_z, 
-    output$beta_est)
-  BASS@results["loglik"] <- mean(BASS@samples$loglik)
-  BASS@elapsed_time <- output$elapsed_time
-  return(BASS)
+    xy <- do.call(rbind, BASS@xy)
+    # initialize cell type labels, spatial domain labels, and
+    # mean parameters of gene expression features
+    if(BASS@init_method == "kmeans"){
+        km_c <- stats::kmeans(x = t(BASS@X_run), centers = BASS@C, 
+                              iter.max = 100, nstart = 1000)
+        km_z <- stats::kmeans(x = t(BASS@X_run), centers = BASS@R,
+                              iter.max = 100, nstart = 1000)
+        init_c <- km_c$cluster - 1
+        init_z <- km_z$cluster - 1
+        init_mu <- t(km_c$centers)
+    } else if(BASS@init_method == "mclust"){
+        mclust_c <- mclust::Mclust(data = t(BASS@X_run), G = BASS@C,
+                                   modelNames = "EEE", verbose = FALSE)
+        mclust_z <- mclust::Mclust(data = t(BASS@X_run), G = BASS@R,
+                                   modelNames = "EEE", verbose = FALSE)
+        init_c <- mclust_c$classification - 1
+        init_z <- mclust_z$classification - 1
+        init_mu <- mclust_c$parameters$mean
+    }
+    
+    output <- BASSFit(X = BASS@X_run, xy = xy, ns = BASS@Ns, 
+                      C = BASS@C, R = BASS@R, k = BASS@k, alpha0 = BASS@alpha0, 
+                      Psi0 = BASS@psi0 * diag(nrow(BASS@X_run)), n0 = BASS@n0,
+                      burnin = BASS@burnin, nsample = BASS@nsample, method = BASS@beta_method,
+                      potts_burnin = BASS@potts_burnin, potts_nsample = BASS@potts_nsample,
+                      step_size = BASS@step_size, tol = BASS@tol, init_c = init_c, 
+                      init_z = init_z, init_mu = init_mu, init_beta = BASS@beta)
+    
+    BASS@samples <- output[c("c", "z", "beta", "pi", "mu", "Sigma", "d", 
+                             "lambda", "loglik")]
+    BASS@results[c("init_c", "init_z", "beta")] <- list(init_c, init_z, 
+                                                        output$beta_est)
+    BASS@results["loglik"] <- mean(BASS@samples$loglik)
+    BASS@elapsed_time <- output$elapsed_time
+    return(BASS)
 }
 
 
@@ -488,76 +505,76 @@ BASS.run <- function(BASS)
 #' @export
 BASS.postprocess <- function(BASS, adjustLS = TRUE)
 {
-  cat("Post-processing...\n")
-  if(adjustLS){ # adjust for label switching
-    nTypes <- max(BASS@samples$c) + 1
-    nDomains <- max(BASS@samples$z) + 1
-    if(nTypes > 1){
-      invisible(capture.output(c_ls <- label.switching::label.switching(
-        method = c("ECR-ITERATIVE-1"), z = t(BASS@samples$c) + 1, 
-        K = nTypes))) 
+    cat("Post-processing...\n")
+    if(adjustLS){ # adjust for label switching
+        nTypes <- max(BASS@samples$c) + 1
+        nDomains <- max(BASS@samples$z) + 1
+        if(nTypes > 1){
+            invisible(capture.output(c_ls <- label.switching::label.switching(
+                method = c("ECR-ITERATIVE-1"), z = t(BASS@samples$c) + 1, 
+                K = nTypes))) 
+        }
+        if(nDomains > 1){
+            invisible(capture.output(z_ls <- label.switching::label.switching(
+                method = c("ECR-ITERATIVE-1"), z = t(BASS@samples$z) + 1, 
+                K = nDomains)))
+        }
+        
+        # 1.cell type labels
+        section_idx <- c(0, cumsum(BASS@Ns))
+        if(nTypes > 1){
+            c_est_ls <- c_ls$clusters[1, ]
+        } else{
+            c_est_ls <- rep(1, sum(BASS@Ns))
+        }
+        c_est_ls <- lapply(1:BASS@L, function(l){
+            c_est_ls[(section_idx[l]+1):section_idx[l+1]]
+        })
+        
+        # 2.spatial domain labels
+        if(nDomains > 1){
+            z_est_ls <- z_ls$clusters[1, ]
+        } else{
+            z_est_ls <- rep(1, sum(BASS@Ns))
+        }
+        z_est_ls <- lapply(1:BASS@L, function(l){
+            z_est_ls[(section_idx[l]+1):section_idx[l+1]]
+        })
+    } else{ # use posterior mode
+        getmode <- function(v)
+        {
+            uniqv <- unique(v)
+            uniqv[which.max(tabulate(match(v, uniqv)))]
+        }
+        c_est_ls <- apply(BASS@samples$c, MARGIN = 1, getmode) + 1
+        z_est_ls <- apply(BASS@samples$z, MARGIN = 1, getmode) + 1
+        section_idx <- c(0, cumsum(BASS@Ns))
+        c_est_ls <- lapply(1:BASS@L, function(l){
+            c_est_ls[(section_idx[l]+1):section_idx[l+1]]
+        })
+        z_est_ls <- lapply(1:BASS@L, function(l){
+            z_est_ls[(section_idx[l]+1):section_idx[l+1]]
+        })
     }
-    if(nDomains > 1){
-      invisible(capture.output(z_ls <- label.switching::label.switching(
-        method = c("ECR-ITERATIVE-1"), z = t(BASS@samples$z) + 1, 
-        K = nDomains)))
-    }
-
-    # 1.cell type labels
-    section_idx <- c(0, cumsum(BASS@Ns))
-    if(nTypes > 1){
-      c_est_ls <- c_ls$clusters[1, ]
-    } else{
-      c_est_ls <- rep(1, sum(BASS@Ns))
-    }
-    c_est_ls <- lapply(1:BASS@L, function(l){
-        c_est_ls[(section_idx[l]+1):section_idx[l+1]]
-      })
-
-    # 2.spatial domain labels
-    if(nDomains > 1){
-      z_est_ls <- z_ls$clusters[1, ]
-    } else{
-      z_est_ls <- rep(1, sum(BASS@Ns))
-    }
-    z_est_ls <- lapply(1:BASS@L, function(l){
-        z_est_ls[(section_idx[l]+1):section_idx[l+1]]
-      })
-  } else{ # use posterior mode
-    getmode <- function(v)
-    {
-      uniqv <- unique(v)
-      uniqv[which.max(tabulate(match(v, uniqv)))]
-    }
-    c_est_ls <- apply(BASS@samples$c, MARGIN = 1, getmode) + 1
-    z_est_ls <- apply(BASS@samples$z, MARGIN = 1, getmode) + 1
-    section_idx <- c(0, cumsum(BASS@Ns))
-    c_est_ls <- lapply(1:BASS@L, function(l){
-      c_est_ls[(section_idx[l]+1):section_idx[l+1]]
-    })
-    z_est_ls <- lapply(1:BASS@L, function(l){
-      z_est_ls[(section_idx[l]+1):section_idx[l+1]]
-    })
-  }
-  
-  # 3.cell type proportion matrix
-  ncell_cr <- table(unlist(c_est_ls), unlist(z_est_ls))
-  # certain spatial domains or cell types may not contain any cells
-  r_wcell <- which(1:BASS@R %in% colnames(ncell_cr))
-  c_wcell <- which(1:BASS@C %in% rownames(ncell_cr))
-  pi_est_ls <- matrix(0, BASS@C, BASS@R)
-  pi_est_ls[c_wcell, r_wcell] <- ncell_cr
-  ncell_r <- apply(pi_est_ls, 2, sum)
-  ncell_r[ncell_r == 0] <- 1
-  pi_est_ls <- pi_est_ls %*% diag(1 / ncell_r)
-
-  results <- list(
-    c = c_est_ls,
-    z = z_est_ls,
-    pi = pi_est_ls
+    
+    # 3.cell type proportion matrix
+    ncell_cr <- table(unlist(c_est_ls), unlist(z_est_ls))
+    # certain spatial domains or cell types may not contain any cells
+    r_wcell <- which(1:BASS@R %in% colnames(ncell_cr))
+    c_wcell <- which(1:BASS@C %in% rownames(ncell_cr))
+    pi_est_ls <- matrix(0, BASS@C, BASS@R)
+    pi_est_ls[c_wcell, r_wcell] <- ncell_cr
+    ncell_r <- apply(pi_est_ls, 2, sum)
+    ncell_r[ncell_r == 0] <- 1
+    pi_est_ls <- pi_est_ls %*% diag(1 / ncell_r)
+    
+    results <- list(
+        c = c_est_ls,
+        z = z_est_ls,
+        pi = pi_est_ls
     )
-  BASS@results[c("c", "z", "pi")] <- results
-  cat("done\n")
-  return(BASS)
+    BASS@results[c("c", "z", "pi")] <- results
+    cat("done\n")
+    return(BASS)
 }
 
