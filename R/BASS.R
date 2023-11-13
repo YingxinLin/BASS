@@ -303,7 +303,7 @@ runLSI <- function(count_matrix, ncomponents) {
 
     tf <- Matrix::t(Matrix::t(count_matrix)/Matrix::colSums(count_matrix))
     idf <- log(1 + ncol(count_matrix)/Matrix::rowSums(count_matrix))
-    tfidf <- tf * idf
+    tfidf <- tf * idf; tfidf[is.na(tfidf)] <- 0; tfidf[is.infinite(tfidf)] <- 0
     SVDtsne <- irlba::irlba(tfidf, ncomponents, ncomponents)
     d_diagtsne <- matrix(0, nrow = ncomponents, ncol = ncomponents)
     diag(d_diagtsne) <- SVDtsne$d
