@@ -301,7 +301,7 @@ listAllHyper <- function(BASS)
 
 runLSI <- function(count_matrix, ncomponents) {
 
-    tf <- t(t(count_matrix)/Matrix::colSums(count_matrix))
+    tf <- Matrix::t(Matrix::t(count_matrix)/Matrix::colSums(count_matrix))
     idf <- log(1 + ncol(count_matrix)/Matrix::rowSums(count_matrix))
     tfidf <- tf * idf
     SVDtsne <- irlba::irlba(tfidf, ncomponents, ncomponents)
